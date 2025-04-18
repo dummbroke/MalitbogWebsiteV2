@@ -1,0 +1,47 @@
+{
+  "news": {
+    "latest": [
+      {
+        "id": 3,
+        "title": "Test News",
+        "date": "2025-04-12",
+        "description": "Testing",
+        "image": "data:image/jpeg;base64,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",
+        "facebookLink": "https://www.facebook.com/keen.thomas.2024"
+      },
+      {
+        "id": 2,
+        "title": "New Infrastructure Project Announced",
+        "date": "2024-04-08",
+        "description": "The local government announces a new infrastructure project to improve community facilities.",
+        "image": "images/infrastructure.jpg",
+        "facebookLink": "https://www.facebook.com/MalitbogMayor/posts/987654321"
+      }
+    ]
+  },
+  "tourism": {
+    "attractions": [
+      {
+        "id": 1,
+        "name": "Malitbog Falls",
+        "category": "Natural Attractions",
+        "description": "A beautiful waterfall located in the heart of Malitbog.",
+        "image": "images/falls.jpg",
+        "location": "Barangay Malitbog",
+        "distance": "5km from town center"
+      }
+    ]
+  },
+  "departments": [
+    {
+      "id": 1,
+      "name": "Mayor's Office",
+      "contact": {
+        "phone": "09123456789",
+        "email": "mayor@malitbog.gov.ph",
+        "facebook": "https://www.facebook.com/MalitbogMayor"
+      },
+      "officeHours": "8:00 AM - 5:00 PM"
+    }
+  ]
+}

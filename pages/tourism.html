@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourism - Malitbog Municipality</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+  <style>
+    :root {
+      --primary-color: #1b5e20;
+      --primary-light: #4c8c4a;
+      --primary-dark: #003300;
+      --text-on-primary: #ffffff;
+    }
+
+    /* Modern Reset and Base Styles */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body { 
+      font-family: 'Roboto', sans-serif; 
+      padding-top: 60px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    /* Modern Header Styles */
+    header {
+      background-color: var(--primary-dark);
+      color: var(--text-on-primary);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px;
+    }
+
+    .logo a {
+      color: var(--text-on-primary);
+      text-decoration: none;
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 1px;
+    }
+
+    /* Navigation Menu Styles */
+    nav {
+      display: flex;
+      gap: 20px;
+      margin-left: auto;
+    }
+
+    nav a {
+      color: var(--text-on-primary);
+      text-decoration: none;
+      padding: 8px 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      font-size: 1rem;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+
+    nav a:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-button {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-on-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 1002;
+      margin-left: auto;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .header-content {
+        padding: 0 20px;
+      }
+      
+      nav {
+        gap: 15px;
+      }
+      
+      nav a {
+        padding: 8px 10px;
+        font-size: 0.95rem;
+      }
+      
+      .logo a {
+        font-size: 1.6rem;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .header-content {
+        padding: 0 15px;
+      }
+      
+      nav {
+        gap: 10px;
+      }
+      
+      nav a {
+        padding: 8px;
+        font-size: 0.9rem;
+      }
+      
+      .logo a {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-content {
+        padding: 0 15px;
+        justify-content: flex-start;
+      }
+
+      .logo {
+        margin-right: auto;
+      }
+
+      nav {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        height: 100vh;
+        width: 280px;
+        background-color: var(--primary-dark);
+        flex-direction: column;
+        gap: 0;
+        padding: 80px 0 0;
+        transition: right 0.3s ease;
+        z-index: 999;
+        align-items: flex-start;
+        overflow-y: auto;
+      }
+
+      nav.active {
+        right: 0;
+      }
+
+      nav a {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border-radius: 0;
+        text-align: left;
+        font-size: 1rem;
+      }
+
+      nav a::after {
+        display: none;
+      }
+
+      .mobile-menu-button {
+        display: block;
+        margin-left: auto;
+      }
+
+      .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 900;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .menu-overlay.active {
+        display: block;
+        opacity: 1;
+      }
+
+      body.menu-open {
+        overflow: hidden;
+      }
+    }
+
+    /* Overlay */
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 900;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .menu-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    /* Hero Section Styles */
+    .hero-section {
+      position: relative;
+      height: 80vh;
+      overflow: hidden;
+      background-color: var(--primary-light);
+    }
+
+    .carousel {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .carousel-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.1);
+      animation: zoomIn 10s infinite alternate;
+    }
+
+    @keyframes zoomIn {
+      0% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1.2);
+      }
+    }
+
+    .carousel-slide.active {
+      opacity: 1;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(27, 94, 32, 0.7), rgba(27, 94, 32, 0.7));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      padding: 0 2rem;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      max-width: 900px;
+      color: var(--text-on-primary);
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .hero-subtitle {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1.4rem;
+      max-width: 800px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease 0.3s forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Animation Classes */
+    [data-aos] {
+      opacity: 0;
+      transition-property: transform, opacity;
+    }
+
+    [data-aos].aos-animate {
+      opacity: 1;
+    }
+
+    /* Modern Tourism Section */
+    .tourism-modern-section {
+      position: relative;
+      padding: 4rem 0;
+      background-color: rgba(232, 245, 233, 0.95);
+      overflow: hidden;
+    }
+
+    .tourism-modern-section::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background-color: rgba(27, 94, 32, 0.05);
+      z-index: 0;
+    }
+
+    .tourism-modern-section::after {
+      content: "";
+      position: absolute;
+      bottom: -100px;
+      right: -100px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background-color: rgba(27, 94, 32, 0.05);
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px;
+    }
+
+    .tourism-section-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      text-align: center;
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .tourism-section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    .tourism-subtitle {
+      color: #666;
+      text-align: center;
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 2rem auto 4rem;
+      line-height: 1.8;
+    }
+
+    /* Modern Card Styles */
+    .tourism-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      padding: 1rem;
+    }
+
+    .tourism-card {
+      background: rgba(241, 248, 233, 0.9);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s ease;
+      cursor: pointer;
+      border: 1px solid rgba(27, 94, 32, 0.1);
+      position: relative;
+      backdrop-filter: blur(5px);
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .tourism-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(27, 94, 32, 0.15);
+      background: rgba(241, 248, 233, 0.95);
+    }
+
+    .tourism-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: var(--primary-color);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s ease;
+    }
+
+    .tourism-card:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .tourism-img-container {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+    }
+
+    .tourism-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .tourism-card:hover .tourism-img {
+      transform: scale(1.1);
+    }
+
+    .tourism-info {
+      padding: 1.5rem;
+    }
+
+    .tourism-name {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .tourism-description {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .tourism-details {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tourism-detail {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .tourism-detail i {
+      color: var(--primary-color);
+      font-size: 1.1rem;
+    }
+
+    .tourism-contact {
+      padding: 1rem;
+      background-color: rgba(27, 94, 32, 0.05);
+      border-radius: 12px;
+      color: #555;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .tourism-contact:hover {
+      background-color: rgba(27, 94, 32, 0.1);
+    }
+
+    /* Modern Category Styles */
+    .tourism-category {
+      margin-bottom: 5rem;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tourism-category-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    .tourism-category-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    .tourism-category-description {
+      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+      max-width: 800px;
+    }
+
+    .tourism-category .tourism-grid {
+      width: 100%;
+      justify-items: center;
+    }
+
+    /* Modern Call to Action */
+    .visit-cta-section {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      padding: 6rem 0;
+      text-align: center;
+      color: white;
+      margin-top: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .visit-cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('../images/pattern.png');
+      opacity: 0.1;
+      z-index: 0;
+    }
+
+    .visit-cta-content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .visit-cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .visit-cta-text {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+      opacity: 0.9;
+    }
+
+    .visit-cta-button {
+      display: inline-block;
+      background-color: white;
+      color: var(--primary-color);
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.4s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .visit-cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .visit-cta-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .visit-cta-button:hover::before {
+      left: 100%;
+    }
+
+    /* Modern Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: rgba(241, 248, 233, 0.95);
+      margin: auto;
+      padding: 2rem;
+      width: 100%;
+      max-width: 800px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(27, 94, 32, 0.2);
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(27, 94, 32, 0.1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal.show {
+      opacity: 1;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--primary-dark);
+      cursor: pointer;
+      padding: 0.5rem;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .modal-close:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-image {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    .modal-description {
+      color: var(--dark-gray);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .modal-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .modal-info-item i {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+      margin-top: 0.2rem;
+    }
+
+    .modal-info-content {
+      flex: 1;
+    }
+
+    .modal-info-label {
+      color: var(--primary-dark);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .modal-info-text {
+      color: var(--dark-gray);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .modal-directions {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .modal-directions-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .modal-directions-link:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 1rem auto;
+        padding: 1.5rem;
+        width: 95%;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        padding-right: 2rem;
+      }
+
+      .modal-description {
+        font-size: 1rem;
+      }
+
+      .modal-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .modal-info-item {
+        gap: 0.8rem;
+      }
+
+      .modal-info-label {
+        font-size: 0.85rem;
+      }
+
+      .modal-info-text {
+        font-size: 0.95rem;
+      }
+
+      .modal-directions-link {
+        width: 100%;
+        justify-content: center;
+        padding: 0.7rem 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .modal-content {
+        margin: 0.5rem auto;
+        padding: 1.2rem;
+      }
+
+      .modal-title {
+        font-size: 1.3rem;
+      }
+
+      .modal-description {
+        font-size: 0.95rem;
+      }
+
+      .modal-info-item i {
+        font-size: 1rem;
+      }
+
+      .modal-info-label {
+        font-size: 0.8rem;
+      }
+
+      .modal-info-text {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Tourist Information Section */
+    .info-section {
+      padding: 6rem 0;
+      background-color: rgba(232, 245, 233, 0.95);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-section::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background-color: rgba(27, 94, 32, 0.05);
+      z-index: 0;
+    }
+
+    .info-section::after {
+      content: "";
+      position: absolute;
+      bottom: -100px;
+      right: -100px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background-color: rgba(27, 94, 32, 0.05);
+      z-index: 0;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .info-card {
+      background: rgba(241, 248, 233, 0.9);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(27, 94, 32, 0.1);
+      backdrop-filter: blur(5px);
+    }
+
+    .info-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(27, 94, 32, 0.15);
+      background: rgba(241, 248, 233, 0.95);
+    }
+
+    .info-icon {
+      font-size: 3.5rem;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      transition: transform 0.4s ease;
+      background-color: rgba(27, 94, 32, 0.1);
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .info-card:hover .info-icon {
+      transform: scale(1.1) rotate(5deg);
+      background-color: rgba(27, 94, 32, 0.15);
+    }
+
+    .info-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    .info-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    .info-text {
+      color: #555;
+      line-height: 1.8;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-button {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-top: auto;
+    }
+
+    .info-button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(27, 94, 32, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .info-section {
+        padding: 4rem 0;
+      }
+      
+      .info-card {
+        padding: 2rem;
+      }
+      
+      .info-title {
+        font-size: 1.8rem;
+      }
+      
+      .info-text {
+        font-size: 1rem;
+      }
+      
+      .info-icon {
+        font-size: 2.5rem;
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    /* Modern Footer Styles 2.0 */
+    .footer {
+      background: linear-gradient(to bottom, var(--primary-dark), #0a2614);
+      color: white;
+      padding: 4rem 0 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer::before,
+    .footer::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
+      z-index: 0;
+    }
+
+    .footer::before {
+      top: -150px;
+      left: -150px;
+    }
+
+    .footer::after {
+      bottom: -150px;
+      right: -150px;
+    }
+
+    .footer-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .footer-section {
+      padding: 0 1.5rem;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .footer-section:hover {
+      transform: translateY(-5px);
+    }
+
+    .footer-section h3 {
+      color: var(--secondary-color);
+      margin-bottom: 1.8rem;
+      font-size: 1.4rem;
+      position: relative;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .footer-section h3::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -0.8rem;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--secondary-color), transparent);
+      border-radius: 2px;
+    }
+
+    .emergency-text, .contact-text, .social-text {
+      text-align: center;
+    }
+
+    .emergency-item, .contact-item, .social-item {
+      justify-content: center;
+    }
+
+    /* Emergency Hotlines Styling */
+    .emergency-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .emergency-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      justify-content: center;
+      text-decoration: none;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .emergency-item:hover {
+      transform: translateX(5px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .emergency-item i {
+      font-size: 1.5rem;
+      color: var(--secondary-color);
+    }
+
+    .emergency-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      text-align: center;
+    }
+
+    .emergency-label {
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    .emergency-number {
+      color: white;
+      font-size: 1rem;
+      line-height: 1.5;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .emergency-number:hover {
+      color: var(--secondary-color);
+    }
+
+    /* Contact Info Styling */
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .contact-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      text-align: center;
+    }
+
+    /* Social Links Styling */
+    .social-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .social-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      justify-content: center;
+      text-decoration: none;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .social-item:hover {
+      transform: translateX(5px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .social-item i {
+      font-size: 1.5rem;
+      color: var(--secondary-color);
+    }
+
+    .social-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      text-align: center;
+    }
+
+    .social-label {
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    .social-name {
+      color: white;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 2rem;
+    }
+
+    .footer-bottom p {
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .footer-section {
+        padding: 0 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    /* Responsive Design for Tourism Cards */
+    @media (max-width: 1200px) {
+        .tourism-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tourism-card {
+            max-width: 350px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .tourism-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        .tourism-card {
+            max-width: 320px;
+        }
+
+        .tourism-img-container {
+            height: 200px;
+        }
+
+        .tourism-info {
+            padding: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .tourism-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+
+        .tourism-card {
+            max-width: 100%;
+        }
+    }
+
+    /* Container Responsive Adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+
+        .tourism-modern-section {
+            padding: 3rem 0;
+        }
+
+        .tourism-section-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tourism-subtitle {
+            font-size: 1rem;
+            margin: 1rem auto 2rem;
+            padding: 0 15px;
+        }
+
+        .tourism-category {
+            margin-bottom: 3rem;
+        }
+
+        .tourism-category-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .tourism-category-description {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 0 10px;
+        }
+
+        .tourism-modern-section {
+            padding: 2rem 0;
+        }
+
+        .tourism-section-title {
+            font-size: 1.8rem;
+        }
+
+        .tourism-subtitle {
+            font-size: 0.9rem;
+            margin: 1rem auto 1.5rem;
+        }
+
+        .tourism-category {
+            margin-bottom: 2rem;
+        }
+
+        .tourism-category-title {
+            font-size: 1.6rem;
+        }
+
+        .tourism-category-description {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Logo and Toggle Button -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <a href="../index.html">Malitbog</a>
+      </div>
+      <button class="mobile-menu-button" aria-label="Toggle Menu">&#9776;</button>
+      <nav>
+        <a href="../index.html">HOME</a>
+        <a href="news.html">NEWS</a>
+        <a href="about.html">ABOUT</a>
+        <a href="legend.html">LEGEND OF MALITBOG</a>
+        <a href="tourism.html">TOURISM</a>
+        <a href="contact.html">CONTACT</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Overlay for mobile menu -->
+  <div class="menu-overlay"></div>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="carousel">
+      <div class="carousel-slide active" style="background-image: url('../images/carousel1.jpg');"></div>
+      <div class="carousel-slide" style="background-image: url('../images/carousel2.jpg');"></div>
+      <div class="carousel-slide" style="background-image: url('../images/carousel3.jpg');"></div>
+      <div class="carousel-slide" style="background-image: url('../images/carousel4.jpg');"></div>
+    </div>
+    <div class="hero-overlay">
+      <h1 class="hero-title">Tourism in Malitbog</h1>
+      <p class="hero-subtitle">Discover the beauty and attractions of our municipality</p>
+    </div>
+  </section>
+
+  <!-- Tourism Content -->
+  <section class="tourism-modern-section">
+    <div class="container">
+      <h2 class="tourism-section-title">Tourist Attractions</h2>
+      <p class="tourism-subtitle">Explore the wonders of Malitbog, from stunning natural landscapes to vibrant cultural sites. Each destination offers a unique experience for visitors of all ages.</p>
+      
+      <!-- Nature Attractions -->
+      <div class="tourism-category">
+        <h3 class="tourism-category-title">Natural Wonders</h3>
+        <p class="tourism-category-description">Discover the breathtaking natural beauty of Malitbog through its pristine waterfalls, rivers, and scenic viewpoints.</p>
+        
+        <div class="tourism-grid">
+          <!-- Bagyangon Falls -->
+          <div class="tourism-card" data-spot-id="bagyangon-falls">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/bagyangon_falls1.jpg" alt="Bagyangon Falls" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Bagyangon Falls</h4>
+              <p class="tourism-description">Discover the hidden gem of Bagyangon Falls, where tranquility and stunning landscapes create a perfect escape.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Bagyangon, Sanluis, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>40 mins (vehicle), 15.6 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Melchor Gaspar
+              </div>
+            </div>
+          </div>
+          
+          <!-- Lower Sampiano River View -->
+          <div class="tourism-card" data-spot-id="lower-sampiano-river-view">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/lower_sampiano1.jpg" alt="Lower Sampiano River View" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Lower Sampiano River View</h4>
+              <p class="tourism-description">Where the serene beauty of nature meets the flowing waters of the Lower Sampiano River.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Lower, Sampiano, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>45 mins (vehicle), 16.3 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Barangay Kagawad Clint Dave L. Dancil (0946 669 3508)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Leropan River and Cave -->
+          <div class="tourism-card" data-spot-id="leropan-river-and-cave">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/leropan_river1.jpg" alt="Leropan River and Cave" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Leropan River and Cave</h4>
+              <p class="tourism-description">A pristine haven where cold, clear waters flow through untouched natural beauty.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Kiabo, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>30 mins (vehicle), 10.9 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> 0930 591 1321
+              </div>
+            </div>
+          </div>
+          
+          <!-- Logdeck River -->
+          <div class="tourism-card" data-spot-id="logdeck-river">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/logdeck_river1.jpg" alt="Logdeck River" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Logdeck River</h4>
+              <p class="tourism-description">Experience the refreshing embrace of Logdeck River, with its cold, crystal-clear waters.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Logdeck, Sanluis, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>45 mins (vehicle), 25 Km</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Buklod Ridge -->
+          <div class="tourism-card" data-spot-id="buklod-ridge">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/buklod_ridge1.jpg" alt="Buklod Ridge" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Buklod Ridge</h4>
+              <p class="tourism-description">Witness breathtaking views from Buklod Ridge, where nature reveals its finest.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Nabalabag Malandang, Siloo, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>1h 20 mins (vehicle), 17.9 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Local Tourism Office
+              </div>
+            </div>
+          </div>
+          
+          <!-- Lunao Paradise -->
+          <div class="tourism-card" data-spot-id="lunao-paradise">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/lanao_paradise1.jpg" alt="Lunao Paradise" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Lunao Paradise</h4>
+              <p class="tourism-description">Discover the tranquil beauty of Lunao Paradise, nestled along the river.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Poblacion, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>5 mins (vehicle), 450m</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> 0906 780 0285
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Resorts and Accommodations -->
+      <div class="tourism-category">
+        <h3 class="tourism-category-title">Resorts & Accommodations</h3>
+        <p class="tourism-category-description">Stay in comfort and style at our various resorts and accommodations, each offering unique experiences and amenities.</p>
+        
+        <div class="tourism-grid">
+          <!-- Golda's Place -->
+          <div class="tourism-card" data-spot-id="goldas-place">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/goldas_place1.jpg" alt="Golda's Place" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Golda's Place</h4>
+              <p class="tourism-description">An enchanting mountain ridge offering breathtaking views and a serene campground setting.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Pigsuguan, Kalingking, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>20 minutes (vehicle), 3.5 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> 0906 164 3950 / 0963 829 2367
+              </div>
+            </div>
+          </div>
+          
+          <!-- Paseo de Suello Resort -->
+          <div class="tourism-card" data-spot-id="paseo-de-suello-resort">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/paseo_de1.jpg" alt="Paseo de Suello Resort" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Paseo de Suello Resort</h4>
+              <p class="tourism-description">Enjoy refreshing dips at Paseo de Suello Resort.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Villamangga, Kalingking, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>10 mins (vehicle), 4.2 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Myrna Halinon (0963 982 6835)
+              </div>
+            </div>
+          </div>
+          
+          <!-- NZX Mountain Resort -->
+          <div class="tourism-card" data-spot-id="nzx-mountain-resort">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/nzx1.jpg" alt="NZX Mountain Resort" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">NZX Mountain Resort</h4>
+              <p class="tourism-description">Escape to the serene heights of NZX Mountain Resort, where every bite comes with a breathtaking view.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Batal, Omagling, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>35 mins (vehicle), 10.2 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Mitregene Tamayo (0953 543 4649)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Big Boss Cold Spring Resort and Fish Farm -->
+          <div class="tourism-card" data-spot-id="big-boss-cold-spring-resort">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/cold_spring1.jpg" alt="Big Boss Cold Spring Resort and Fish Farm" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Big Boss Cold Spring Resort and Fish Farm</h4>
+              <p class="tourism-description">Unwind in the peaceful cold spring waters and explore our lush farmlands.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sabangaan, San Luis, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>47 mins (vehicle), 19.8 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Rodolfo F. Fadrilan (0961 443 2293)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Rianne's Pad & Swimming Pool -->
+          <div class="tourism-card" data-spot-id="riannes-pad-and-swimming-pool">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/rianne's_pad1.jpg" alt="Rianne's Pad & Swimming Pool" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Rianne's Pad & Swimming Pool</h4>
+              <p class="tourism-description">Dive in and refresh your soul.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Zone 1 Poblacion, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>3 mins (vehicle), 400m</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Azilanna Achas (0956 637 8972)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cafes and Farms -->
+      <div class="tourism-category">
+        <h3 class="tourism-category-title">Cafes & Farms</h3>
+        <p class="tourism-category-description">Experience the local flavors and agricultural heritage of Malitbog through our charming cafes and farms.</p>
+        
+        <div class="tourism-grid">
+          <!-- Egoy's Cafe -->
+          <div class="tourism-card" data-spot-id="egoys-cafe">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/egoy's_cafe1.jpg" alt="Egoy's Cafe" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Egoy's Cafe</h4>
+              <p class="tourism-description">Relax and enjoy the view at Egoy's charming café.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Dambaan, Sanluis Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>20 mins (vehicle), 12.6 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Ray O. Calapis (0906 485 9888)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Min Sea - Coffee Farm -->
+          <div class="tourism-card" data-spot-id="min-sea-coffee-farm">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/min_sea1.jpg" alt="Min Sea - Coffee Farm" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Min Sea - Coffee Farm</h4>
+              <p class="tourism-description">Indulge in cozy accommodations, farm-to-table meals, and endless coffee delights amidst stunning views.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Man-ay, Mindagat, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>20 mins (vehicle), 7.8 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> 0927 366 7081
+              </div>
+            </div>
+          </div>
+          
+          <!-- Monte Shannahs Farms -->
+          <div class="tourism-card" data-spot-id="monte-shannahs-farms">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/monte1.jpg" alt="Monte Shannahs Farms" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Monte Shannahs Farms</h4>
+              <p class="tourism-description">Experience the charm of Monte Shannahs Farm, where nature and tranquility meet.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Lake, Sanluis, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>30 mins (vehicle), 16.4 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Maria Zenaida Q. Leonen (0917 718 1856)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Paula's Mountain Ridge -->
+          <div class="tourism-card" data-spot-id="paulas-mountain-ridge">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/paulas_mountain1.jpg" alt="Paula's Mountain Ridge" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Paula's Mountain Ridge</h4>
+              <p class="tourism-description">Serene beauty and a perfect cup of coffee await at Paula's Mountain Ridge.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Barangay Kiabo, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>45 mins (vehicle), 24.8 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Paula Ragandang (0910 026 3248)
+              </div>
+            </div>
+          </div>
+          
+          <!-- LRC Diversified Farm -->
+          <div class="tourism-card" data-spot-id="lrc-diversified-farm" data-aos="fade-up" data-aos-delay="500">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/lrc1.jpg" alt="LRC Diversified Farm" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">LRC Diversified Farm</h4>
+              <p class="tourism-description">Feel at home at LRC Diversified Farm.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Sitio Gam-oc Anahaw, Mindagat Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>20 mins (vehicle), 4.3 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> Eleneta A. Caballero (0926 597 3907 / 0955 992 3954)
+              </div>
+            </div>
+          </div>
+          
+          <!-- Cafe Ilyona -->
+          <div class="tourism-card" data-spot-id="cafe-ilyona" data-aos="fade-up" data-aos-delay="600">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/cafe_ilyona1.jpg" alt="Cafe Ilyona" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Cafe Ilyona</h4>
+              <p class="tourism-description">Enjoy a cozy atmosphere and delightful treats at Cafe Ilyona.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Omagling, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>11 mins (vehicle), 2.9 Km</span>
+                </div>
+              </div>
+              <div class="tourism-contact">
+                <strong>Contact:</strong> 0927 303 3361
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cultural Attractions -->
+      <div class="tourism-category">
+        <h3 class="tourism-category-title">Cultural Attractions</h3>
+        <p class="tourism-category-description">Immerse yourself in the rich cultural heritage of Malitbog through our historical sites and cultural centers.</p>
+        
+        <div class="tourism-grid">
+          <!-- Malitbog Cultural Center -->
+          <div class="tourism-card" data-spot-id="malitbog-cultural-center">
+            <div class="tourism-img-container">
+              <img src="../images/tourism/malitbog_cultural1.jpg" alt="Malitbog Cultural Center" class="tourism-img">
+            </div>
+            <div class="tourism-info">
+              <h4 class="tourism-name">Malitbog Cultural Center</h4>
+              <p class="tourism-description">A vibrant hub of heritage and creativity.</p>
+              <div class="tourism-details">
+                <div class="tourism-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Poblacion, Malitbog Bukidnon</span>
+                </div>
+                <div class="tourism-detail">
+                  <i class="fas fa-road"></i>
+                  <span>2 mins (vehicle), 450m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tourist Information Section -->
+  <section class="info-section">
+    <div class="container">
+      <h2 class="tourism-section-title">Visitor Information</h2>
+      <p class="tourism-subtitle">Plan your visit to Malitbog with these helpful tips and information to make the most of your experience.</p>
+      
+      <div class="info-grid">
+        <!-- Getting Here -->
+        <div class="info-card">
+          <div class="info-icon">
+            <i class="fas fa-route"></i>
+          </div>
+          <h3 class="info-title">Getting Here</h3>
+          <p class="info-text">You can commute from Limketkai Center, National Highway, Cagayan de Oro, 9000 Misamis Oriental using a bus. The bus will take you directly to the Malitbog Public Market, Malitbog, Bukidnon. The journey takes approximately 1 hour and 30 minutes by bus. If you're traveling by car or motorcycle, you can arrive earlier in just about 1 hour.</p>
+          <a href="#" class="info-button">View Routes</a>
+        </div>
+        
+        <!-- Accommodations -->
+        <div class="info-card">
+          <div class="info-icon">
+            <i class="fas fa-bed"></i>
+          </div>
+          <h3 class="info-title">Where to Stay</h3>
+          <p class="info-text">Many tourists choose to set up camp at Golda's Place, one of the most famous tourist spots in Malitbog. This mountain ridge offers breathtaking views and a serene campground setting perfect for overnight stays. For those seeking more traditional accommodations, there are also local homestays available in the Poblacion area.</p>
+          <a href="#" class="info-button">Find Accommodations</a>
+        </div>
+        
+        <!-- Local Cuisine -->
+        <div class="info-card">
+          <div class="info-icon">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h3 class="info-title">Local Cuisine</h3>
+          <p class="info-text">Malitbog offers several restaurants and cafes where you can enjoy delicious local meals. From traditional Filipino dishes to fresh seafood specialties, there's something for every palate. Don't miss the opportunity to try our local delicacies, including coconut-based dishes and traditional desserts.</p>
+          <a href="#" class="info-button">Explore Food</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="visit-cta-section">
+    <div class="visit-cta-content">
+      <h2 class="visit-cta-title">Ready to Explore Malitbog?</h2>
+      <p class="visit-cta-text">Discover the natural beauty and rich culture of Malitbog. Plan your visit today and experience the wonders of our municipality.</p>
+      <a href="contact.html" class="visit-cta-button">Plan Your Visit</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Emergency Hotlines</h3>
+          <div class="emergency-list">
+            <div class="emergency-item">
+              <i class="fas fa-shield-alt"></i>
+              <div class="emergency-text">
+                <span class="emergency-label">Police</span>
+                <a href="tel:09162356818" class="emergency-number">09162356818</a>
+              </div>
+            </div>
+            <div class="emergency-item">
+              <i class="fas fa-fire-extinguisher"></i>
+              <div class="emergency-text">
+                <span class="emergency-label">Fire Station</span>
+                <a href="tel:09432459223" class="emergency-number">09432459223</a>
+              </div>
+            </div>
+            <div class="emergency-item">
+              <i class="fas fa-first-aid"></i>
+              <div class="emergency-text">
+                <span class="emergency-label">MDRRMO</span>
+                <a href="tel:09777209125" class="emergency-number">09777209125</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h3>Contact Us</h3>
+          <div class="contact-info">
+            <div class="contact-list">
+              <div class="contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="contact-text">
+                  <span class="contact-label">Address</span>
+                  <span class="contact-value">Malitbog Municipal Hall<br>Main Street, Malitbog</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <div class="contact-text">
+                  <span class="contact-label">Phone</span>
+                  <span class="contact-value">(123) 456-7890</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <div class="contact-text">
+                  <span class="contact-label">Email</span>
+                  <span class="contact-value">info@malitbog.gov.ph</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Connect With Us</h3>
+          <div class="social-section">
+            <div class="social-pages">
+              <div class="social-list">
+                <a href="https://www.facebook.com/MalitbogMayor" target="_blank" class="social-item">
+                  <i class="fab fa-facebook"></i>
+                  <div class="social-text">
+                    <span class="social-label">Mayor's Office</span>
+                    <span class="social-name">Municipality of Malitbog</span>
+                  </div>
+                </a>
+                <a href="https://www.facebook.com/MalitbogMps" target="_blank" class="social-item">
+                  <i class="fab fa-facebook"></i>
+                  <div class="social-text">
+                    <span class="social-label">Police Station</span>
+                    <span class="social-name">Malitbog Municipal Police</span>
+                  </div>
+                </a>
+                <a href="https://www.facebook.com/Malitbog" target="_blank" class="social-item">
+                  <i class="fab fa-facebook"></i>
+                  <div class="social-text">
+                    <span class="social-label">Fire Station</span>
+                    <span class="social-name">BFP Malitbog</span>
+                  </div>
+                </a>
+                <a href="https://www.facebook.com/MdrrmoMalitbog" target="_blank" class="social-item">
+                  <i class="fab fa-facebook"></i>
+                  <div class="social-text">
+                    <span class="social-label">Disaster Risk Management</span>
+                    <span class="social-name">MDRRMO Malitbog</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2025 Malitbog Municipality. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div id="spotModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <img class="modal-image" src="" alt="">
+        <h2 class="modal-title"></h2>
+        <p class="modal-description"></p>
+        <div class="modal-info">
+            <div class="modal-info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="modal-info-content">
+                    <div class="modal-info-label">Location</div>
+                    <div class="modal-info-text location-text"></div>
+                </div>
+            </div>
+            <div class="modal-info-item">
+                <i class="fas fa-road"></i>
+                <div class="modal-info-content">
+                    <div class="modal-info-label">Distance</div>
+                    <div class="modal-info-text distance-text"></div>
+                </div>
+            </div>
+            <div class="modal-info-item contact-info">
+                <i class="fas fa-phone"></i>
+                <div class="modal-info-content">
+                    <div class="modal-info-label">Contact</div>
+                    <div class="modal-info-text contact-text"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-directions">
+            <a href="" class="modal-directions-link" target="_blank">
+                <i class="fas fa-directions"></i>
+                Get Directions
+            </a>
+        </div>
+    </div>
+  </div>
+
+  <script src="../js/script.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""></script>
+  <script>
+    // Tourism spots data
+    const tourismSpots = {
+      'bagyangon-falls': {
+        title: 'Bagyangon Falls',
+        description: 'Discover the hidden gem of Bagyangon Falls, where tranquility and stunning landscapes create a perfect escape.',
+        location: 'Sitio Bagyangon, Sanluis, Malitbog Bukidnon',
+        distance: '40 mins (vehicle), 15.6 Km',
+        contact: 'Melchor Gaspar',
+        image: '../images/tourism/bagyangon_falls1.jpg'
+      },
+      'lower-sampiano-river-view': {
+        title: 'Lower Sampiano River View',
+        description: 'Where the serene beauty of nature meets the flowing waters of the Lower Sampiano River.',
+        location: 'Sitio Lower, Sampiano, Malitbog Bukidnon',
+        distance: '45 mins (vehicle), 16.3 Km',
+        contact: 'Barangay Kagawad Clint Dave L. Dancil (0946 669 3508)',
+        image: '../images/tourism/lower_sampiano1.jpg'
+      },
+      'leropan-river-and-cave': {
+        title: 'Leropan River and Cave',
+        description: 'A pristine haven where cold, clear waters flow through untouched natural beauty.',
+        location: 'Kiabo, Malitbog Bukidnon',
+        distance: '30 mins (vehicle), 10.9 Km',
+        contact: '0930 591 1321',
+        image: '../images/tourism/leropan_river1.jpg'
+      },
+      'logdeck-river': {
+        title: 'Logdeck River',
+        description: 'Experience the refreshing embrace of Logdeck River, with its cold, crystal-clear waters.',
+        location: 'Sitio Logdeck, Sanluis, Malitbog Bukidnon',
+        distance: '45 mins (vehicle), 25 Km',
+        image: '../images/tourism/logdeck_river1.jpg'
+      },
+      'buklod-ridge': {
+        title: 'Buklod Ridge',
+        description: 'Witness breathtaking views from Buklod Ridge, where nature reveals its finest.',
+        location: 'Sitio Nabalabag Malandang, Siloo, Malitbog Bukidnon',
+        distance: '1h 20 mins (vehicle), 17.9 Km',
+        contact: 'Local Tourism Office',
+        image: '../images/tourism/buklod_ridge1.jpg'
+      },
+      'lunao-paradise': {
+        title: 'Lunao Paradise',
+        description: 'Discover the tranquil beauty of Lunao Paradise, nestled along the river.',
+        location: 'Poblacion, Malitbog Bukidnon',
+        distance: '5 mins (vehicle), 450m',
+        contact: '0906 780 0285',
+        image: '../images/tourism/lanao_paradise1.jpg'
+      },
+      'goldas-place': {
+        title: 'Golda\'s Place',
+        description: 'An enchanting mountain ridge offering breathtaking views and a serene campground setting.',
+        location: 'Sitio Pigsuguan, Kalingking, Malitbog Bukidnon',
+        distance: '20 minutes (vehicle), 3.5 Km',
+        contact: '0906 164 3950 / 0963 829 2367',
+        image: '../images/tourism/goldas_place1.jpg'
+      },
+      'paseo-de-suello-resort': {
+        title: 'Paseo de Suello Resort',
+        description: 'Enjoy refreshing dips at Paseo de Suello Resort.',
+        location: 'Sitio Villamangga, Kalingking, Malitbog Bukidnon',
+        distance: '10 mins (vehicle), 4.2 Km',
+        contact: 'Myrna Halinon (0963 982 6835)',
+        image: '../images/tourism/paseo_de1.jpg'
+      },
+      'nzx-mountain-resort': {
+        title: 'NZX Mountain Resort',
+        description: 'Escape to the serene heights of NZX Mountain Resort, where every bite comes with a breathtaking view.',
+        location: 'Sitio Batal, Omagling, Malitbog Bukidnon',
+        distance: '35 mins (vehicle), 10.2 Km',
+        contact: 'Mitregene Tamayo (0953 543 4649)',
+        image: '../images/tourism/nzx1.jpg'
+      },
+      'big-boss-cold-spring-resort': {
+        title: 'Big Boss Cold Spring Resort and Fish Farm',
+        description: 'Unwind in the peaceful cold spring waters and explore our lush farmlands.',
+        location: 'Sabangaan, San Luis, Malitbog Bukidnon',
+        distance: '47 mins (vehicle), 19.8 Km',
+        contact: 'Rodolfo F. Fadrilan (0961 443 2293)',
+        image: '../images/tourism/cold_spring1.jpg'
+      },
+      'riannes-pad-and-swimming-pool': {
+        title: 'Rianne\'s Pad & Swimming Pool',
+        description: 'Dive in and refresh your soul.',
+        location: 'Zone 1 Poblacion, Malitbog Bukidnon',
+        distance: '3 mins (vehicle), 400m',
+        contact: 'Azilanna Achas (0956 637 8972)',
+        image: '../images/tourism/rianne\'s_pad1.jpg'
+      },
+      'egoys-cafe': {
+        title: 'Egoy\'s Cafe',
+        description: 'Relax and enjoy the view at Egoy\'s charming café.',
+        location: 'Sitio Dambaan, Sanluis Malitbog Bukidnon',
+        distance: '20 mins (vehicle), 12.6 Km',
+        contact: 'Ray O. Calapis (0906 485 9888)',
+        image: '../images/tourism/egoy\'s_cafe1.jpg'
+      },
+      'min-sea-coffee-farm': {
+        title: 'Min Sea - Coffee Farm',
+        description: 'Indulge in cozy accommodations, farm-to-table meals, and endless coffee delights amidst stunning views.',
+        location: 'Sitio Man-ay, Mindagat, Malitbog Bukidnon',
+        distance: '20 mins (vehicle), 7.8 Km',
+        contact: '0927 366 7081',
+        image: '../images/tourism/min_sea1.jpg'
+      },
+      'monte-shannahs-farms': {
+        title: 'Monte Shannahs Farms',
+        description: 'Experience the charm of Monte Shannahs Farm, where nature and tranquility meet.',
+        location: 'Sitio Lake, Sanluis, Malitbog Bukidnon',
+        distance: '30 mins (vehicle), 16.4 Km',
+        contact: 'Maria Zenaida Q. Leonen (0917 718 1856)',
+        image: '../images/tourism/monte1.jpg'
+      },
+      'paulas-mountain-ridge': {
+        title: 'Paula\'s Mountain Ridge',
+        description: 'Serene beauty and a perfect cup of coffee await at Paula\'s Mountain Ridge.',
+        location: 'Barangay Kiabo, Malitbog Bukidnon',
+        distance: '45 mins (vehicle), 24.8 Km',
+        contact: 'Paula Ragandang (0910 026 3248)',
+        image: '../images/tourism/paulas_mountain1.jpg'
+      },
+      'lrc-diversified-farm': {
+        title: 'LRC Diversified Farm',
+        description: 'Feel at home at LRC Diversified Farm.',
+        location: 'Sitio Gam-oc Anahaw, Mindagat Malitbog Bukidnon',
+        distance: '20 mins (vehicle), 4.3 Km',
+        contact: 'Eleneta A. Caballero (0926 597 3907 / 0955 992 3954)',
+        image: '../images/tourism/lrc1.jpg'
+      },
+      'cafe-ilyona': {
+        title: 'Cafe Ilyona',
+        description: 'Enjoy a cozy atmosphere and delightful treats at Cafe Ilyona.',
+        location: 'Omagling, Malitbog Bukidnon',
+        distance: '11 mins (vehicle), 2.9 Km',
+        contact: '0927 303 3361',
+        image: '../images/tourism/cafe_ilyona1.jpg'
+      },
+      'malitbog-cultural-center': {
+        title: 'Malitbog Cultural Center',
+        description: 'A vibrant hub of heritage and creativity.',
+        location: 'Poblacion, Malitbog Bukidnon',
+        distance: '2 mins (vehicle), 450m',
+        image: '../images/tourism/malitbog_cultural1.jpg'
+      }
+    };
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize carousel
+      let currentSlide = 0;
+      const slides = document.querySelectorAll('.carousel-slide');
+      
+      function nextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+      }
+      
+      setInterval(nextSlide, 5000);
+
+      // Initialize mobile menu
+      const mobileMenuButton = document.querySelector('.mobile-menu-button');
+      const nav = document.querySelector('nav');
+      const overlay = document.querySelector('.menu-overlay');
+      const body = document.body;
+
+      mobileMenuButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nav.classList.toggle('active');
+        overlay.classList.toggle('active');
+        body.classList.toggle('menu-open');
+      });
+
+      overlay.addEventListener('click', function() {
+        nav.classList.remove('active');
+        overlay.classList.remove('active');
+        body.classList.remove('menu-open');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!nav.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+          nav.classList.remove('active');
+          overlay.classList.remove('active');
+          body.classList.remove('menu-open');
+        }
+      });
+
+      // Initialize modal
+      const modal = document.getElementById('spotModal');
+      const modalClose = modal.querySelector('.modal-close');
+      const modalImage = modal.querySelector('.modal-image');
+      const modalTitle = modal.querySelector('.modal-title');
+      const modalDescription = modal.querySelector('.modal-description');
+      const locationText = modal.querySelector('.location-text');
+      const distanceText = modal.querySelector('.distance-text');
+      const contactText = modal.querySelector('.contact-text');
+      const contactInfo = modal.querySelector('.contact-info');
+      const directionsLink = modal.querySelector('.modal-directions-link');
+
+      document.querySelectorAll('.tourism-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const spotId = this.getAttribute('data-spot-id');
+          const spot = tourismSpots[spotId];
+          
+          if (spot) {
+            // Check if the device is a mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // Directly open Google Maps directions on mobile devices
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.location)}`;
+                window.open(directionsUrl, '_blank');
+            } else {
+                // Show modal for desktop browsers
+                modalImage.src = spot.image;
+                modalImage.alt = spot.title;
+                modalTitle.textContent = spot.title;
+                modalDescription.textContent = spot.description;
+                locationText.textContent = spot.location;
+                distanceText.textContent = spot.distance;
+                
+                if (spot.contact) {
+                    contactText.textContent = spot.contact;
+                    contactInfo.style.display = 'flex';
+                } else {
+                    contactInfo.style.display = 'none';
+                }
+
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.location)}`;
+                directionsLink.href = directionsUrl;
+                
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+          }
+        });
+      });
+      
+      // Close modal functionality
+      modalClose.addEventListener('click', () => {
+        modal.classList.remove('show');
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = 'auto';
+      });
+      
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('show');
+          setTimeout(() => {
+            modal.style.display = 'none';
+          }, 300);
+          document.body.style.overflow = 'auto';
+        }
+      });
+      
+      // Close modal on Escape key press
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+          modal.classList.remove('show');
+          setTimeout(() => {
+            modal.style.display = 'none';
+          }, 300);
+          document.body.style.overflow = 'auto';
+        }
+      });
+      
+      // Prevent modal close when clicking modal content
+      modal.querySelector('.modal-content').addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      // Add loading state for images
+      modalImage.addEventListener('load', function() {
+        this.style.opacity = '1';
+      });
+
+      modalImage.addEventListener('error', function() {
+        this.src = '../images/placeholder.jpg';
+      });
+    });
+  </script>
+</body>
+</html> 
